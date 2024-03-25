@@ -1,25 +1,41 @@
-import logo from './logo.svg';
-import './App.css';
+import { Suspense, startTransition, useState } from "react";
+import IndexPage from "./components/IndexPage.js";
+import ArtistPage from "./components/ArtistPage.js";
+import Layout from "./components/Layout.js";
 
-function App() {
+export default function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Suspense fallback={<BigSpinner />}>
+      <Router />
+    </Suspense>
   );
 }
 
-export default App;
+function Router() {
+  const [page, setPage] = useState("/");
+
+  function navigate(url) {
+    startTransition(() => {
+      setPage(url);
+    });
+  }
+
+  let content;
+  if (page === "/") {
+    content = <IndexPage navigate={navigate} />;
+  } else if (page === "/the-beatles") {
+    content = (
+      <ArtistPage
+        artist={{
+          id: "the-beatles",
+          name: "The Beatles",
+        }}
+      />
+    );
+  }
+  return <Layout>{content}</Layout>;
+}
+
+function BigSpinner() {
+  return <h2>🌀 Loading...</h2>;
+}
